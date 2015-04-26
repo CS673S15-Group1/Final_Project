@@ -41,8 +41,7 @@ INSTALLED_APPS = (
     'requirements',
     'comm',
     'issue_tracker',
-    'rest_framework',
-    'corsheaders'
+    'corsheaders',
 )
 
 MIDDLEWARE_CLASSES = (
