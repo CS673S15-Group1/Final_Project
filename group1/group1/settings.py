@@ -91,3 +91,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, '../../static'))
 
 LOGIN_URL = '/signin'
+
+CORS_ALLOW_HEADER = (
+    'x-requested-with',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization',
+    'x-csrftoken',
+    'accept-encoding',
+)
+

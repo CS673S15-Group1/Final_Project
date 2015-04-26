@@ -10,15 +10,15 @@ var multer = require('multer');
 var fs = require('fs');
 var crypto = require('crypto');
 
+// Add CORS headers to all express requests
 app.all('/*', function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "X-Requested-With");
   next();
 });
 
-// file upload
+// just for file upload
 var done = false;
-
 app.use(multer({
 	'dest': '/home/pgmvt/sites/pre.3blueprints.com/static/',
 	onFileUploadStart: function(file) {
@@ -33,9 +33,9 @@ app.use(multer({
 app.post('/upload', function(req,res){
 	if (done==true) {
 		var hash = crypto.randomBytes(20).toString('hex');
-		fs.mkdir( util.format('static/uploads/%s', hash), function(){
+		fs.mkdir( util.format('/home/pgmvt/sites/pre.3blueprints.com/static/uploads/%s', hash), function(){
 			var final_path = util.format('static/uploads/%s/%s', hash, req.files.fileUpload.originalname);
-			fs.rename(req.files.fileUpload.path, final_path);
+			fs.rename(req.files.fileUpload.path, '/home/pgmvt/sites/pre.3blueprints.com/' + final_path);
 			res.send(final_path);
 		});
 	}
@@ -60,7 +60,12 @@ global_namespace.on('connection', function(socket){
 		users.pop(user);
 		console.log( util.format('%s disconnected', user) );
 		global_namespace.emit('user', {'username': user, 'action': 'disconnected' });
-	})
+	});
+	socket.on('room', function(room){
+		console.log('new room: '  + room.name);
+		add_new_namespace(room);
+		global_namespace.emit('room', room);
+	});
 });
 
 
@@ -71,28 +76,27 @@ app.get('/users', function(req,res){
 	res.send(_.unique(users));
 });
 
-
-
-
 var room_url = 'http://localhost/api/rooms/?format=json';
+
+namespaces = {}
+
+function add_new_namespace(room) {
+  namespaces[room.id] = io.of(util.format('/%s', room.id))
+    .on('connection', function(socket) {
+       socket.on('msg',function(msg){
+         namespaces[room.id].emit('msg', msg);
+         messages.save(room.id, util.format('%s: %s', msg.username, msg.value), msg.user_id);
+       });
+       socket.on('disconnect',function(){
+         // console.log(util.format('someone disconnected from %s', room.id ));
+       });
+  });
+}
+
 client.get(room_url,function(data,response){
-	namespaces = {}; 
-	data.forEach(function(room){
-		namespaces[room.id] = io.of(util.format('/%s', room.id))
-		.on('connection', function(socket) {
-			// console.log(util.format('someone connected to %s', room.id));
-			socket.on('msg',function(msg){
-				namespaces[room.id].emit('msg', msg);
-				messages.save(room.id, util.format('%s: %s', msg.username, msg.value), msg.user_id);
-			});
-
-			socket.on('disconnect',function(){
-				// console.log(util.format('someone disconnected from %s', room.id ));
-			});
-
-		});
-	});
-
+  data.forEach(function(room){
+    add_new_namespace(room);
+  });
 });
 
 var messages = {
@@ -112,29 +116,6 @@ var messages = {
 	}
 }
 
-var rooms = {
-	'save': function(name, description, public) {
-		message_template = {
-			data: {
-				'name': name,
-				'description': description,
-				'public': true 
-			},
-			headers: { 'Content-Type': 'application/json' }
-		};
-		client.post('http://localhost/api/messages', message_template, function(data,response) {
-			console.log(response.statusCode);
-		});
-	}
-}
-
-
-function broadcast(msg, activeNamespaces) {
-	activeNamespaces.forEach(function(aNamespace) {
-		aNamespace.emit('msg', msg);
-	});
-}
-
 var msg_endpoint = 'http://localhost:8000/api/messages/'
 
 var message_template = {
@@ -148,12 +129,6 @@ var message_template = {
 
 // WebSocket stuff
 io.on('connection', function(socket) {
-	console.log('user connected!');
-
-	socket.on('disconnect', function(){
-		console.log('user disconnected!');
-	});
-
 	socket.on('msg', function(msg) {
 		io.emit('msg', msg);
 		message_template.data.text = msg;

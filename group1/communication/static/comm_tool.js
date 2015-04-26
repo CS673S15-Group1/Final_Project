@@ -1,5 +1,62 @@
+String.prototype.splice = function( idx, rem, s ) {
+    return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
+};
+
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 function createteam(){
-$("#myModal").modal('show');
+  $("#myModal").modal('show');
+}
+
+// EMOJI STUFF
+function emoji_input(emoji_name) {
+  $('input#text').val($('input#text').val()+emoji_name);
+}
+
+var emoji_image = {
+  '::happy::': "<img src='/static/emoji/happy.jpg' style='width:20px;height:20px;'>",
+  '::unhappy::':"<img src='/static/emoji/unhappy.jpg' style='width:20px;height:20px;'>",
+  '::terrible::': "<img src='/static/emoji/terrible.jpg' style='width:20px;height:20px;'>",
+  '::veryhappy::': "<img src='/static/emoji/veryhappy.jpg' style='width:20px;height:20px;'>",
+  '::angry::': "<img src='/static/emoji/angry.jpg' style='width:20px;height:20px;'>",
+  '::sweat::': "<img src='/static/emoji/sweat.jpg' style='width:20px;height:20px;'>",
+  '::trick::': "<img src='/static/emoji/trick.jpg' style='width:20px;height:20px;'>",
+  '::kiss::': "<img src='/static/emoji/kiss.jpg' style='width:20px;height:20px;'>",
+  '::disappoint::': "<img src='/static/emoji/disappoint.jpg' style='width:20px;height:20px;'>",
+  '::sick::': "<img src='/static/emoji/sick.jpg' style='width:20px;height:20px;'>",
+  '::laughtear::': "<img src='/static/emoji/laughtear.jpg' style='width:20px;height:20px;'>",
+  '::sadtear::': "<img src='/static/emoji/sadtear.jpg' style='width:20px;height:20px;'>",
+  '::blink::': "<img src='/static/emoji/blink.jpg' style='width:20px;height:20px;'>",
+  '::disdain::': "<img src='/static/emoji/disdain.jpg' style='width:20px;height:20px;'>",
+  '::omg::': "<img src='/static/emoji/omg.jpg' style='width:20px;height:20px;'>",
+  '::embarrased::': "<img src='/static/emoji/embarrased.jpg' style='width:20px;height:20px;'>",
+  '::sillysmile::': "<img src='/static/emoji/sillysmile.jpg' style='width:20px;height:20px;'>",
+  '::surprise::': "<img src='/static/emoji/surprise.jpg' style='width:20px;height:20px;'>",
+  '::cry::': "<img src='/static/emoji/cry.jpg' style='width:20px;height:20px;'>",
+  '::sleepy::': "<img src='/static/emoji/sleepy.jpg' style='width:20px;height:20px;'>",
+  '::hearteye::': "<img src='/static/emoji/hearteye.jpg' style='width:20px;height:20px;'>",
+  '::flush::': "<img src='/static/emoji/flush.jpg' style='width:20px;height:20px;'>",
+  '::laughnoeye::': "<img src='/static/emoji/laughnoeye.jpg' style='width:20px;height:20px;'>",
+  '::blue::': "<img src='/static/emoji/blue.jpg' style='width:20px;height:20px;'>",
+  '::rat::': "<img src='/static/emoji/rat.jpg' style='width:20px;height:20px;'>",
+  '::clrat::': "<img src='/static/emoji/clrat.jpg' style='width:20px;height:20px;'>",
+  '::rabit::': "<img src='/static/emoji/rabit.jpg' style='width:20px;height:20px;'>",
+  '::pig::': "<img src='/static/emoji/pig.jpg' style='width:20px;height:20px;'>",
+  '::cat::': "<img src='/static/emoji/cat.jpg' style='width:20px;height:20px;'>",
+  '::monkey::': "<img src='/static/emoji/monkey.jpg' style='width:20px;height:20px;'>",
 }
 
 //toggle the search bar
@@ -24,12 +81,41 @@ var server_host = window.location.hostname;
 var base_url = 'http://' + server_host + ':3000/';
 var global = io('http://' + server_host + ':3000');
 
-console.log('username: ' + user);
-
 global.emit('user', {
   'username': user,
   'action': 'connect',
 });
+
+global.on('room', function(room) { 
+	console.log('new room: ' + room.name);
+	add_new_room(room);
+});
+
+function createTeamFunc() {
+
+    var new_team_name = $('input#teamname').val();
+    var room_data = {
+        'name': new_team_name,
+        'description': 'test',
+        'public': true
+    };
+
+    $.ajax({
+        type: 'POST',
+        url: 'http://pre.3blueprints.com/api/rooms/',
+        beforeSend: function (request) {
+            request.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+        },
+        data: room_data,
+        success: function(room) {
+            console.log(room);
+            global.emit('room', room);
+        },
+    });
+
+    $("#myModal").modal('hide');
+}
+
 global.on('user', function(user){
 
   var user_link = $('ul.user_list a').filter( function(link) { return $(this).text() === user.username }).parent();
@@ -45,17 +131,20 @@ global.on('user', function(user){
 sockets = {};
 $.getJSON('http://' + server_host + '/api/rooms/',function(data){
   data.forEach(function(room){
+    // add_socket(room);
+  });
+});
+
+function add_socket(room) {
     var socket = io(base_url + room.id);
     socket.on('msg', function(msg) {
       if (room.id != visible_namespace()) {
         increment_badge(room.id);
       }
-      add_message('<b>' + msg.username + '</b>: ' + msg.value, room.id); 
+      add_message('<b>' + msg.username + '</b>: ' + msg.value, room.id);
     });
     sockets[room.id] = socket;
-  });
-});
-
+}
 
 function increment_badge(room_id){
   var badge = $('div#room-list a').filter( function(){ return $(this).attr('id') === 'room-' + room_id } ).children().filter('.badge');
@@ -65,6 +154,15 @@ function increment_badge(room_id){
 
 function add_message(msg, target) {
   $('div#room-' + target).append(msg + '<br>');
+  //add emoji to message content
+  var emoji_string=Object.getOwnPropertyNames(emoji_image);
+  if (msg.indexOf('::') != -1) {
+    for(var i=0;i<emoji_string.length;i++){
+      var each=emoji_string[i];
+      var change=$('div#room-'+target).html();
+      $('div#room-'+target).html(change.replace(each,emoji_image[each]));
+    }
+  }
 }
 
 function visible_namespace() {
@@ -74,10 +172,6 @@ function visible_namespace() {
     return null;
   }
 }
-
-// function create_team(){
-//   $('#add_team_modal').modal('show');
-// }
 
 // Called when button is clicked
 function display() {
@@ -91,19 +185,14 @@ function display() {
   $('input#text').val('');
 }
 
-// Generate random user
-function random_user() {
-  var random_index = Math.floor( Math.random() * 100 ) + 1;
-  return "User " + random_index;
-}
-
 // Add a new message whenever the user presses the enter key
-$(document).keypress(function(e) {
-    if(e.which == 13) {
-        display();
-    }
+$(document).ready(function(){
+        $("#text").keypress(function(e) {
+            if(e.which == 13) {
+                display();
+            }
+	});
 });
-
 
 var mobile_nav = {
   'message': function() {
@@ -115,7 +204,6 @@ var mobile_nav = {
     $('div.sidebar').removeClass('hidden-xs hidden-sm');
   }
 }
-
 
 function switch_room(target_room){
 
@@ -151,19 +239,29 @@ function get_message_data(room_id) {
     $.getJSON(message_endpoint, function(data){
       data.forEach(function(msg){
         message_room = Number(msg.room.split('/api/rooms/')[1].slice(0,-1));
-        if (message_room === room_id) { add_message(msg.text, room_id) };
+        var message_text = msg.text.splice(msg.text.indexOf(':'),0,'</b>');
+        message_text = message_text.splice(0,0,'<b>');
+        if (message_room === room_id) { add_message(message_text, room_id) };
       });
     });
 
 }
 
-
 function populate_room_list() {
 
   $.getJSON('http://' + server_host + '/api/rooms/?format=json', function(data) { 
-    global_room_list = data;
+    // global_room_list = data;
     data.forEach(function(room) {
+      add_new_room(room);
+      get_message_data(room.id);
+    });
 
+    switch_room('room-' + global_room_list[0].id);
+
+  });
+}
+
+function add_new_room(room) {
       var room_link = $('<a />', {
         'href': '#',
         'id': 'room-' + room.id,
@@ -178,7 +276,7 @@ function populate_room_list() {
         'class': 'badge'
       }));
 
-      $('div#room-list').append(room_link)
+      $('div#room-list').append(room_link);
 
       // add room to message list
       $('div#message_list').append( $('<div />', {
@@ -187,13 +285,9 @@ function populate_room_list() {
         'text': '',
       }));
 
-      get_message_data(room.id);
+     global_room_list.push(room);
+     add_socket(room);
 
-    });
-
-    switch_room('room-' + global_room_list[0].id);
-
-  });
 }
 
 function populate_user_list() {
@@ -224,16 +318,19 @@ function populate_user_list() {
     });
   });
 }
+
 //upload file
 function filechoose(){
-$("#inputmodal").modal('show');
+  $("#inputmodal").modal('show');
 }
+
 $(document).on('change', '.btn-file :file', function() {
   var input = $(this),
       numFiles = input.get(0).files ? input.get(0).files.length : 1,
       label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
   input.trigger('fileselect', [numFiles, label]);
 });
+
 $(document).ready( function() {
     $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
         
@@ -244,8 +341,7 @@ $(document).ready( function() {
             input.val(log);
         } else {
             if( log ) alert(log);
-        }
-        
+        }        
     });
 });
 
@@ -283,7 +379,32 @@ $(document).ready(function(){
 
 });
 
-    
+$(document).ready(function(){
+ function get_search_results() {
+   $("searchResults").val("");
+   var queryString = $("#search_box").val();
+   var message_endpoint = 'http://' + server_host + '/api/messagesearch/?search=' + queryString;
+   $.getJSON(message_endpoint, function(data){
+     data.forEach(function(msg){
+       $("#searchResults").append('<b>User:</b> ' + msg.user.username + '<br>' +
+                '<b>Room:</b> ' + msg.room.roomname + '<br>' +
+                '<b>Time:</b> ' + msg.time + '<br>' +
+                '<b>Message:</b> ' + msg.text + '<br>' +
+                '<br>');
+     });
+   });
+   $("#searchModal").modal('show');
+   $("#search_box").val("");
+ }
 
+ $("#search_box").keyup(function (e) {
+     if (e.which == 13) {
+     get_search_results();
+   }
+   return false;
+ });
 
-
+ $("#search_button_box").click(function () {
+   get_search_results();
+ });
+}); 

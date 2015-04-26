@@ -75,7 +75,8 @@ z-index: 1000;
 padding-right: 35px;
 }
 div.messagecontent {
-	padding-top: 70px;
+padding-top: 70px;
+padding-bottom: 60px;    
 }
 div#mymodal{
 z-index: 1000000;
