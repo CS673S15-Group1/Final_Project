@@ -6,8 +6,8 @@ from django.forms import ModelForm
 from issue_tracker.models import STATUSES
 from issue_tracker.models import TYPES
 from issue_tracker.models import PRIORITIES
-from issue_tracker.models import PROJECTS
 from issue_tracker import models as it_models
+from requirements.models import project as project_model
 
 
 class EmptyChoiceField(forms.ChoiceField):
@@ -40,8 +40,8 @@ class SearchForm(forms.Form):
                                   empty_label='')
     priority = EmptyChoiceField(choices=PRIORITIES, required=False,
                                 empty_label='')
-    project = EmptyChoiceField(choices=PROJECTS, required=False,
-                               empty_label='')
+    project = forms.ModelChoiceField(
+        queryset=project_model.Project.objects.all(), required=False)
 
     # TODO(jdarrieu) Need to look into how to get this hooked up.
     # Date based filtering still not working.

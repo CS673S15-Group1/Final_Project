@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.forms.widgets import ClearableFileInput
 from django.forms.extras.widgets import SelectDateWidget, Select
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, PasswordChangeForm, UserChangeForm
 from requirements.models import user_association
 from requirements.models.project import Project
 from requirements.models.story import Story
@@ -10,8 +10,6 @@ from requirements.models.task import Task
 from requirements.models.iteration import Iteration
 from requirements.models.story_comment import StoryComment
 from django.forms.models import inlineformset_factory
-
-
 
 class SignUpForm(UserCreationForm):
 	email = forms.EmailField(required=True)
@@ -35,6 +33,32 @@ class SignUpForm(UserCreationForm):
 			user.save()
 		return user
 
+class ChangePwdForm(PasswordChangeForm):
+
+	def __init__(self, *args, **kwargs):
+		self.user = kwargs.pop('user', None)
+		super(PasswordChangeForm, self).__init__(self.user, *args, **kwargs)
+		for name, field in self.fields.items():
+			if field.widget.attrs.has_key('class'):
+				field.widget.attrs['class'] += 'form-control'
+			else:
+				field.widget.attrs.update({'class':'form-control'})
+
+class UserProfileForm(UserChangeForm):
+
+	def __init__(self, *args, **kwargs):
+		super(UserChangeForm, self).__init__(*args, **kwargs)
+		for name, field in self.fields.items():
+			if field.widget.attrs.has_key('class'):
+				field.widget.attrs['class'] += 'form-control'
+			else:
+				field.widget.attrs.update({'class':'form-control'})
+
+	class Meta:
+		model = User
+		fields = ('first_name','last_name','email','username')
+
+
 class IterationForm(forms.ModelForm):
 	
 	def __init__(self, *args, ** kwargs):
@@ -45,6 +69,13 @@ class IterationForm(forms.ModelForm):
 			else:
 				field.widget.attrs.update({'class':'form-control'})
 
+	def clean_end_date(self):
+		startdate = self.cleaned_data['start_date']
+		enddate = self.cleaned_data['end_date']
+		if enddate < startdate:
+			raise forms.ValidationError('Iteration end date should be later than it\'s start date !')
+		return enddate
+		
 	class Meta:	
 		model = Iteration
 		fields = ('title', 'description', 'start_date', 'end_date',)
@@ -91,6 +122,12 @@ class StoryForm(forms.ModelForm):
 				field.widget.attrs['class'] += ' form-control'
 			else:
 				field.widget.attrs.update({'class':'form-control'})
+	
+	def clean_hours(self):
+		data = self.cleaned_data['hours']
+		if data < 0:
+			raise forms.ValidationError('Hours should be greater than or equal to 0 !')
+		return data
 
 	class Meta:
 		model = Story
@@ -111,8 +148,6 @@ class FileForm(forms.Form):
 # 	username=forms.CharField(label='Username:', max_length=100)
 # 	password=forms.CharField(label='password:', max_length=100, widget=forms.PasswordInput())
 # 	confirmPassword=forms.CharField(label='Confirm password:', max_length=100)
-
-TaskFormSet = inlineformset_factory(Story, Task, fields=('description',), extra=0)
 
 class CommentForm(forms.ModelForm):
 
@@ -147,3 +182,6 @@ class TaskForm(forms.ModelForm):
 		widgets = {
 			'description' : forms.Textarea(attrs={'rows': 1}),
 		}	
+
+TaskFormSet = inlineformset_factory(Story, Task, fields=('description',), form=TaskForm, extra=0)
+

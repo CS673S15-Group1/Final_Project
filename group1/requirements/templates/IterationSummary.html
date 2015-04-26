@@ -11,6 +11,28 @@
 	        <form id="iterationForm" class="form-horizontal" action="{{ action }}" method="post">
 	        	{% csrf_token %}
 	        	<div class="modal-body">
+                    {% if confirm_message %}
+                    <div class="form-group">
+                        <div class="col-xs-12 col-sm-3"><h2><span class="label label-danger">Warning</span></h2></div>
+                        <div class="col-xs-12 col-sm-9"><h3>{{ confirm_message }}</h3></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-12 col-sm-3"><h4>{{ form.title.label_tag }}</h4></div>
+                        <div class="col-xs-12 col-sm-9"><h4>{{ form.title.value }}</h4></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-12 col-sm-3"><h4>{{ form.description.label_tag }}</h4></div>
+                        <div class="col-xs-12 col-sm-9"><h4>{{ form.description.value|linebreaksbr }}</h4></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-12 col-sm-3"><h4>{{ form.start_date.label_tag }}</h4></div>
+                        <div class="col-xs-12 col-sm-9"><h4>{{ form.end_date.value|date:"M. d Y" }}</h4></div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-xs-12 col-sm-3"><h4>{{ form.end_date.label_tag }}</h4></div>
+                        <div class="col-xs-12 col-sm-9"><h4>{{ form.end_date.value|date:"M. d Y" }}</h4></div>
+                    </div>
+                    {% else %}
                     {% if form.title.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
@@ -61,15 +83,24 @@
                         <div class="col-xs-12 col-sm-9" id="{{ form.end_date.id_for_label }}_popover">
                             <div class="input-group date form_datetime">
                                 {{ form.end_date }}
+                                {% if form.end_date.errors %}
+                                <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true" style="padding-right: 60px;"></span>
+                                <span id="inputError2Status" class="sr-only">(error)</span>
+                                {% endif %}
                                 <span class="input-group-addon"><i class="fa fa-calendar fa-fw"></i></span>
                             </div>
                         </div>
                     </div>
+                    {% endif %}
 	        	</div>
         		<div class="modal-footer">
         		  	<a class="btn btn-default" href="javascript:void(0)" onclick="closeDialog();">Close</a>
 					<!-- <button type="submit" class="btn btn-primary">Save</button> -->
+                    {% if confirm_message %}
+                    <a class="btn btn-danger" href="javascript:void(0);" onclick="saveIterationChanges();">{{ button_desc }}</a>
+                    {% else %}
                     <a class="btn btn-primary" href="javascript:void(0);" onclick="saveIterationChanges();">{{ button_desc }}</a>
+                    {% endif %}
         		</div>
 	        </form>
 

@@ -3,9 +3,11 @@ from django.conf.urls import patterns, include, url
 from requirements.views import projects 
 from requirements.views import stories
 from requirements.views import iterations
+from requirements.views import users
 
 urlpatterns = patterns('',
-    
+    url(r'^changepasswd',users.changepasswd),
+    url(r'^userprofile',users.userprofile),
 
     url(r'^projects', projects.list_projects),
     url(r'^projectdetail/(?P<projectID>\d+)', projects.project),

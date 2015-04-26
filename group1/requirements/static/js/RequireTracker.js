@@ -35,9 +35,12 @@ function getStoryPointHtml(point) {
 	return pointhtml;
 }
 
-function loadIterationList(projectID) {
+function loadIterationList(projectID, iterationID) {
 	var listUrl = "/req/iterations/" + projectID;
 	var listID = "#proj_" + projectID + "_iters";
+	if (iterationID != null) {
+		listUrl = "/req/iterationswithselection/" + projectID + "/" + iterationID;
+	};
 	$.ajax({
 		type: "GET",
 		cache: false,

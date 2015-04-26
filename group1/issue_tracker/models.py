@@ -1,6 +1,7 @@
 from django.contrib.auth import models as auth_models
 from django.core.urlresolvers import reverse
 from django.db import models
+from requirements.models import project as project_model
 
 OPEN_STATUSES = (
     ('Open-New', 'New',),
@@ -31,12 +32,6 @@ PRIORITIES = (
     )
 
 
-# TODO(jdarrieu): Dummied up, waiting for other team to provide.
-PROJECTS = (('Dummy Project 1', 'Dummy project1',),
-            ('Dummy Project 2', 'Dummy project2',),
-            )
-
-
 class Issue(models.Model):
     """Issue"""
     title = models.CharField(max_length=100)
@@ -44,11 +39,15 @@ class Issue(models.Model):
     issue_type = models.CharField(max_length=20, choices=TYPES)
     status = models.CharField(max_length=20, default='new', choices=STATUSES)
     priority = models.CharField(max_length=20, choices=PRIORITIES)
-    project = models.CharField(max_length=100, blank=True, choices=PROJECTS)
+
+    # Project
+    project = models.ForeignKey(project_model.Project,
+                                null=True)
     # Dates
     submitted_date = models.DateTimeField(auto_now_add=True, editable=False)
     modified_date = models.DateTimeField(auto_now=True)
     closed_date = models.DateTimeField(null=True, editable=False)
+
     # Users
     reporter = models.ForeignKey(auth_models.User, related_name='reporter',
                                  null=True)

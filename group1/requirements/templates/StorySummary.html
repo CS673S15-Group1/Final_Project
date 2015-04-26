@@ -50,6 +50,7 @@
                       <div class="col-xs-12 col-sm-9"><h4 id="story_point">{{ form.points.value }}</h4></div>
                     </div>
                     {% else %}
+                    
                     {% if form.title.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
@@ -64,6 +65,7 @@
                             {% endif %}
                         </div>
                     </div>
+                    
                     {% if form.description.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
@@ -78,6 +80,7 @@
                             {% endif %}
                         </div>
                     </div>
+                    
                     {% if form.reason.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
@@ -92,6 +95,7 @@
                             {% endif %}
                         </div>
                     </div>
+                    
                     {% if form.test.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
@@ -113,8 +117,10 @@
                             increments the value of the task-set-TOTAL_FORMS element by one.
                         -->                 
                         <!-- <div> -->
+                    {% check_permission association project "EditTasks" as can_edit_tasks %}
+                    {% if can_edit_tasks %}
                     <div class="form-group">
-                        <h4     style="font-weight:bold" class="col-xs-12 col-sm-3 control-label">Tasks:</h4>
+                        <h5     style="font-weight:bold" class="col-xs-12 col-sm-3 control-label">Tasks:</h5>
                         <input  id="id_task_set-TOTAL_FORMS" 
                                 name="task_set-TOTAL_FORMS" 
                                 type="hidden" value="{{ numTasks }}" />
@@ -135,15 +141,21 @@
                             because in order to create a new form dynamically, that function copies
                             the first in this list -- so there has to be one to start! 
                         -->
-                    {% for form in formset.forms %}
+                    {% for tform in formset.forms %}
                     <div class="form-group item">
                         <label  for="id_task_set-{{ forloop.counter0 }}-description" class="col-xs-12 col-sm-3 control-label">Description</label>
                         <div class="col-xs-12 col-sm-9">
-                            <input  id="id_task_set-{{ forloop.counter0 }}-description" 
+                            {{ tform.description }}
+<!--                             <input  id="id_task_set-{{ forloop.counter0 }}-description" 
                                     maxlength="1024" 
                                     name="task_set-{{ forloop.counter0 }}-description" 
                                     type="text" 
-                                    value="{{ form.description.value }}" class="form-control" />
+                                    value="{{ tform.description.value }}" class="form-control" /> -->
+<!--                             <input  id="id_task_set-{{ forloop.counter0 }}-description" 
+                                    maxlength="1024" 
+                                    name="task_set-{{ forloop.counter0 }}-description" 
+                                    type="text" 
+                                    value="{{ form.description.value }}" class="form-control" readonly /> -->
                             <input  id="id_task_set-{{ forloop.counter0 }}-DELETE" 
                                     name="task_set-{{ forloop.counter0 }}-DELETE" 
                                     style="display:none"
@@ -154,7 +166,7 @@
                                 element for task_id. That's how Django knows they're new, and it 
                                 will create a new id once it's submitted.   
                             -->
-                            {% if form.id.value == None %}
+                            {% if tform.id.value == None %}
                             <input  id="id_task_set-{{ forloop.counter0 }}-id"
                                     name="task_set-{{ forloop.counter0 }}-id" 
                                     type="hidden" />
@@ -162,14 +174,14 @@
                             <input  id="id_task_set-{{ forloop.counter0 }}-id" 
                                     name="task_set-{{ forloop.counter0 }}-id" 
                                     type="hidden" 
-                                    value="{{ form.id.value }}" />
+                                    value="{{ tform.id.value }}" />
                             {% endif %}
                             
                             <!--
                                 The same practice goes for stories.  If it's new, don't
                                 include the "value" attribute on story_id.
                             -->
-                            {% if form.story.id.value == '' %}
+                            {% if tform.story.id.value == '' %}
                             <input  id="id_task_set-{{ forloop.counter0 }}-story" 
                                     name="task_set-{{ forloop.counter0 }}-story" 
                                     type="hidden" />
@@ -177,7 +189,7 @@
                             <input  id="id_task_set-{{ forloop.counter0 }}-story" 
                                     name="task_set-{{ forloop.counter0 }}-story" 
                                     type="hidden" 
-                                    value="{{ form.story.id }}" />
+                                    value="{{ tform.story.id }}" />
                             {% endif %}
                             <a class="delete btn btn-link" href="#">
                                 <i class="fa fa-trash-o fa-fw"></i>
@@ -192,11 +204,15 @@
                         <!-- </div> -->
                     </div>
                     {% endfor %}
+                    {% else %}
+                    <div style="visibility: hidden; height: 0px;">{{ formset }}</div>
+                    {% endif %}
                         <!-- </div> -->
                         <!--End tasks section-->
-
                         
                         <!-- <hr> -->
+                    {% check_permission association project "EditOwner" as can_edit_owner %}    
+                    {% if can_edit_owner %}
                     {% if form.owner.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
@@ -211,6 +227,10 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% else %}
+                    <div style="visibility: hidden; height: 0px;">{{ form.owner }}</div>
+                    {% endif %}
+                    
                     {% check_permission association project "EditHours" as can_edit_hours %}
                     {% if can_edit_hours %}
                     {% if form.hours.errors %}
@@ -223,14 +243,19 @@
                             <div class="input-group">
                                 {{ form.hours }}
                                 {% if form.hours.errors %}
-                                <span class="glyphicon glyphicon-remove form-control-feedback input-group-addon" aria-hidden="true"></span>
-                                <span id="inputError2Status" class="sr-only input-group-addon">(error)</span>
+                                <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true" style="padding-right: 60px;"></span>
+                                <span id="inputError2Status" class="sr-only">(error)</span>
                                 {% endif %}
                                 <span class="input-group-addon">Hrs</span>
                             </div>
                         </div>
                     </div>
+                    {% else %}
+                    <div style="visibility: hidden; height: 0px;">{{ form.hours }}</div>
                     {% endif %}
+                    
+                    {% check_permission association project "SelectStoryStatus" as can_select_status %}
+                    {% if can_select_status %}
                     {% if form.status.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
@@ -245,6 +270,10 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% else %}
+                    <div style="visibility: hidden; height: 0px;">{{ form.status }}</div>
+                    {% endif %}
+                    
                     {% check_permission association project "EditPoints" as can_edit_points %}
                     {% if can_edit_points %}
                     {% if form.points.errors %}
@@ -261,7 +290,10 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% else %}
+                    <div style="visibility: hidden; height: 0px;">{{ form.points }}</div>
                     {% endif %}
+
                     {% check_permission association project "PauseStory" as can_pause %}
                     {% if can_pause %}
                     {% if form.pause.errors %}
@@ -278,6 +310,8 @@
                             {% endif %}
                         </div>
                     </div>
+                    {% else %}
+                    <div style="visibility: hidden; height: 0px;">{{ form.pause }}</div>
                     {% endif %}
                     {% endif %}
                 </div>
@@ -289,7 +323,7 @@
                     <a class="btn btn-danger" href="javascript:void(0);" onclick="saveStoryChanges();">{{ button_desc }}</a>
                     <!-- <button type="submit" class="btn btn-danger">{{ button_desc }}</button> -->
                     {% else %}
-                    <a class = "btn btn-default" id ="btn-state" onclick=""> Next State</a>
+                    <a class = "btn btn-default" id ="btn-state" onclick="change_state();"> Next State</a>
                     <a class="btn btn-default" href="javascript:void(0);" onclick="closeDialog();">Close</a>
                     <!-- <button type="submit" class="btn btn-primary">{{ button_desc }}</button> -->
                     <a class="btn btn-primary" href="javascript:void(0);" onclick="saveStoryChanges();">{{ button_desc }}</a>
@@ -333,7 +367,7 @@
                         location.reload(true);
                     }
                 },
-                async: false
+                async: true
             });
         }
 
@@ -352,46 +386,8 @@
         // });
 
         $(function() {
-            $("#story_point").html(getStoryPointHtml({{ form.points.value }}));
+            // $("#story_point").html(getStoryPointHtml({{ form.points.value }}));
 
-            //only show the last one of tasks add button
-            $(".item").find(".add").css("visibility","hidden");
-            $(".item:last").find(".add").css("visibility","visible");
-        });
-
-        function change_state(){
-            var state = document.getElementById("{{ form.status.id_for_label }}");
-            if (state.selectedIndex<3){
-                document.getElementById("btn-state").disabled=false;
-                document.getElementById("btn-state").style.visibility="visible";
-               state.selectedIndex =state.selectedIndex+1;
-            }
-            else{
-                document.getElementById("btn-state").disabled=true;
-                document.getElementById("btn-state").style.visibility="hidden";
-            }
-        }
-
-       // /*
-       // When edit form is loaded, the following function checks the status of the story, if it is accepted, the 
-       // next state button is disabled because there are no more states. After that, it checks the paused feature, if the checkbox is checked, you cannot go to the next state, so the next state button is disabled, if it is unchecked, the next state button is enabled. 
-       // */
-
-       $(document).ready(function() {
-            var state = document.getElementById("{{ form.status.id_for_label }}");
-            var paused =document.getElementById("{{ form.pause.id_for_label }}"); 
-        
-            if (state.selectedIndex>2){
-                document.getElementById("btn-state").disabled=true;
-                document.getElementById("btn-state").style.visibility="hidden";
-            }
-
-            if (paused.checked==true){
-                document.getElementById("btn-state").disabled=true;
-                document.getElementById("btn-state").style.visibility="hidden"   
-            }
-            
-            
             //hide the delete label & checkbox that the management_form uses
             $( "label[for*='DELETE']" ).each(function () {
                 $(this).attr('style', 'display:none');
@@ -400,10 +396,81 @@
             $( "input[id*='DELETE']" ).each(function () {
                 $(this).attr('style', 'display:none');
             });
-        });    
+
+            //only show the last one of tasks add button
+            $(".item").find(".add").css("visibility","hidden");
+            $(".item:last").find(".add").css("visibility","visible");
+
+            change_state_button(get_current_state());
+
+        });
+
+        function get_current_state() {
+            return $("#{{ form.status.id_for_label }}").find("option:selected").val();
+        }
+
+        function get_state_button_desc(state_code) {
+            switch (state_code) {
+                case "1":
+                    return "Start";
+                case "2":
+                    return "Finish";
+                case "3":
+                    return "Accept";
+                case "4":
+                    return "Accepted";
+                default:
+                    return "";
+            }
+        }
+
+        function change_state(){
+            var state = $("#{{ form.status.id_for_label }}").get(0);
+            if (state.selectedIndex < 3) {
+                state.selectedIndex += 1;
+            }
+            change_state_button(get_current_state());
+        }
+
+        {% check_permission association project "ChangeStoryStatus" as can_change_status %}
+        {% check_permission association project "AcceptStory" as can_accept_story %}
+
+        function change_state_button(state_code) {
+            {% if can_change_status %}
+            var canChangeStatus = true;
+            {% else %}
+            var canChangeStatus = false;
+            {% endif %}
+
+            {% if can_accept_story %}
+            var canAcceptStory = true;
+            {% else %}
+            var canAcceptStory = false;
+            {% endif %}
+
+            $("#btn-state").html(get_state_button_desc(state_code));
+            $("#btn-state").css("visibility","hidden");
+            
+            if (state_code == "1" && canChangeStatus == true) {
+                $("#btn-state").css("visibility","visible");
+            }
+
+            if (state_code == "2" && canChangeStatus == true) {
+                $("#btn-state").css("visibility","visible");
+            }
+
+            if (state_code == "3" && canAcceptStory == true) {
+                $("#btn-state").css("visibility","visible");
+            }
+        }
+       // /*
+       // When edit form is loaded, the following function checks the status of the story, if it is accepted, the 
+       // next state button is disabled because there are no more states. After that, it checks the paused feature, if the checkbox is checked, you cannot go to the next state, so the next state button is disabled, if it is unchecked, the next state button is enabled. 
+       // */
+
         
         // Register the click event handlers
-        $("#add").click(function () {
+        $(".add").click(function () {
             // $(this).css("visibility","hidden");
             return addForm(this, "task_set");
         });
@@ -424,7 +491,7 @@
             
             //remove errors from the new row, if any
             $(".errorlist", row).remove();
-            $(row).children().removeClass("error");
+            $(row).find().removeClass("error");
             
             //update the names & reset the vals
             var html = $(".item:last").html();
@@ -444,6 +511,10 @@
             $(".item:last").find(".add").css("visibility","visible");
 
             // Add an event handler for the delete item/form link 
+            $(row).find(".add").click(function () {
+                return addForm(this, prefix);
+            });
+
             $(row).find(".delete").click(function () {
                 return deleteForm(this, prefix);
             });

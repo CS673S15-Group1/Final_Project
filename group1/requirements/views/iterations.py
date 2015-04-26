@@ -6,6 +6,7 @@ from requirements.models import user_manager
 from requirements.models import story as mdl_story
 from requirements.models import iteration as mdl_iteration
 from requirements.models.user_manager import user_owns_project
+from requirements.models.user_association import UserAssociation
 from forms import IterationForm
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, redirect
@@ -21,6 +22,9 @@ def iteration(request, projectID, iterationID):
     if project_api.can_user_access_project(request.user.id, projectID):
         projects = project_api.get_projects_for_user(request.user.id)
         project = project_api.get_project(projectID)
+        if project == None:
+            return redirect('/req/projects')
+        association = UserAssociation.objects.get(user=request.user, project=project)
         iterations = project_api.get_iterations_for_project(project)
         iteration = project_api.get_iteration(iterationID)
         if iteration != None:
@@ -29,6 +33,7 @@ def iteration(request, projectID, iterationID):
             stories = project_api.get_stories_with_no_iteration(project)
         context = {'projects' : projects,
                    'project' : project,
+                   'association' : association,
                    'iterations' : iterations,
                    'iteration' : iteration,
                    'stories' : stories,

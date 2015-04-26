@@ -2,7 +2,7 @@ from django import forms
 import requirements.models.user_manager
 from requirements.models import user_manager
 from django.http import HttpResponse, HttpResponseRedirect
-from forms import SignUpForm
+from forms import SignUpForm, ChangePwdForm, UserProfileForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.template import RequestContext
@@ -74,3 +74,44 @@ def signout(request):
     logout(request)
     context = {'isUserSigningInUpOrOut': 'true'}
     return render(request, 'SignOut.html', context)
+
+@login_required(login_url='/signin')
+def changepasswd(request):
+    user = request.user
+    if request.method == 'POST':
+        form = ChangePwdForm(request.POST,user=user)
+        if form.is_valid():
+            form.save(commit=True)
+            logout(request)
+            return HttpResponse('')
+    else:
+        form = ChangePwdForm(user=user)
+
+    context = {
+        'form': form,
+        'title': 'Change Password',
+        'confirm_message': 'After confirming changes. System will automatically logout !',
+        'action': '/req/changepasswd',
+        'button_desc': 'Confirm Change & Logout',
+    }
+    return render(request, 'ChangePasswd.html', context)
+
+@login_required(login_url='/signin')
+def userprofile(request):
+    user = request.user
+    if request.method == 'POST':
+        form = UserProfileForm(request.POST,instance=user)
+        if form.is_valid():
+            form.save(commit=True)
+            return HttpResponse('')
+    else:
+        form = UserProfileForm(instance=user)
+
+    context = {
+        'form': form,
+        'title': 'Change User Profile',
+        'action': '/req/userprofile',
+        'button_desc': 'Change Profile'
+    }
+    return render(request, 'UserProfile.html', context)
+

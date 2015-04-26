@@ -87,10 +87,10 @@
                 data : $("form").serialize(),
                 success : function(data) {
                     $("#dialogModal").html(data);
-                    // loadUsersInProject({{ project.id }});
-                    location.reload(true);
+                    loadUsersInProject({{ project.id }});
+                    // location.reload(true);
                 },
-                async:false
+                async: true
             });
             // e.stopPropagation();
         }

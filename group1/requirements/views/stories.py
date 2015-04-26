@@ -31,16 +31,18 @@ def new_story(request, projectID):
         form = StoryForm(request.POST,project=project)
         if form.is_valid():
 # <<<<<<< HEAD
+            story = form.save(commit=False)
             formset = TaskFormSet(request.POST, instance=story)
             if formset.is_valid():
                 story = mdl_story.create_story(project, request.POST)
-                story = form.save(commit=False)
                 formset.instance=story
                 formset.save()
                 # return redirect('/req/projects/' + projectID)
                 # return empty string and do the redirect stuff in front-end
                 return HttpResponse('')
-
+        else:
+            formset = TaskFormSet(request.POST, instance=story)
+            # formset.extra = 1
 # =======
             # story = mdl_story.create_story(project, request.POST)
             # story = form.save(commit=False)
@@ -54,8 +56,8 @@ def new_story(request, projectID):
         form = StoryForm(project=project)
         formset = TaskFormSet(instance=story)
         formset.extra = 1
-    project = project_api.get_project(projectID)
-    association = UserAssociation.objects.get(user=request.user, project=project)    
+    # project = project_api.get_project(projectID)
+    # association = UserAssociation.objects.get(user=request.user, project=project)    
     context = {'title' : 'New User Story',
                'form' : form,
                'project': project,
@@ -68,8 +70,8 @@ def new_story(request, projectID):
 #     return render(request, 'StorySummary.html', context )
 # =======
                'formset' : formset,
-               'initTasks' : 0,
-               'numTasks' : 1,
+               'initTasks' : formset.initial_form_count(),
+               'numTasks' : formset.total_form_count(),
                'action' : '/req/newstory/' + projectID , 
                'button_desc' : 'Create User Story' }
     return render(request, 'StorySummary.html', context )
@@ -94,6 +96,7 @@ def edit_story(request, projectID, storyID):
             
             if formset.is_valid():
                 story.save()
+                # formset.instance=story
                 formset.save()
                 # return redirect('/req/projects/' + projectID)
                 # return empty string and do the redirect stuff in front-end
@@ -106,6 +109,8 @@ def edit_story(request, projectID, storyID):
             # else:
             #     next = request.POST['next']
             #     return redirect(next)
+        else:
+            formset = TaskFormSet(request.POST, instance=story)
 # >>>>>>> newfeature-additerationdetail
     else:
 # <<<<<<< HEAD
@@ -141,8 +146,8 @@ def edit_story(request, projectID, storyID):
 #                'button_desc' : 'Save Changes'}
 # =======
                'formset' : formset,
-               'initTasks' : initTasks,
-               'numTasks' : numTasks,
+               'initTasks' : formset.initial_form_count(),
+               'numTasks' : formset.total_form_count(),
                'action' : '/req/editstory/' + projectID + '/' + storyID, 
                'button_desc' : 'Save Changes'}
 # >>>>>>> newfeature-TasksFormset
@@ -153,6 +158,7 @@ def edit_story(request, projectID, storyID):
 @user_has_role(user_association.PERM_DELETE_STORY)
 def delete_story(request, projectID, storyID):
     project = project_api.get_project(projectID)
+    association = UserAssociation.objects.get(user=request.user, project=project)
     story = models.story.get_story(storyID)
     if story == None:
         # return redirect('/req/projectdetail/' + projectID)
@@ -173,6 +179,8 @@ def delete_story(request, projectID, storyID):
 
     context = {'title' : 'Delete User Story',
                'confirm_message' : 'This is an irreversible procedure ! You will lose all information about this user story !',
+               'project': project,
+               'association': association,
                'form' : form, 
                'action' : '/req/deletestory/' + projectID + '/' + storyID, 
                'button_desc' : 'Delete User Story' }
@@ -197,16 +205,22 @@ def move_story_to_icebox(request,projectID,storyID):
 @login_required(login_url='/signin')
 def list_tasks(request, storyID):
     story = mdl_story.get_story(storyID)
+    project = story.project
+    association = UserAssociation.objects.get(user=request.user,project=project)
     tasks = mdl_task.get_tasks_for_story(story)
     form = TaskForm()
     context = {'story': story,
                 'tasks': tasks,
-                'newform': form}
+                'newform': form,
+                'project': project,
+                'association': association}
     return render(request, 'TaskList.html', context)
 
 @login_required(login_url='/signin')
 def add_task_into_list(request, storyID):
     story = mdl_story.get_story(storyID)
+    project = story.project
+    association = UserAssociation.objects.get(user=request.user,project=project)
     if request.method == 'POST':
         form = TaskForm(request.POST)
         if form.is_valid():
@@ -217,7 +231,9 @@ def add_task_into_list(request, storyID):
     context = {
         'story': story,
         'tasks': tasks,
-        'newform': form
+        'newform': form,
+        'project': project,
+        'association': association
     }
     return render(request, 'TaskList.html', context)
 
@@ -244,6 +260,8 @@ def add_task_into_list(request, storyID):
 def edit_task_in_list(request, storyID, taskID):
     story = mdl_story.get_story(storyID)
     task = mdl_task.get_task(taskID)
+    project = story.project
+    association = UserAssociation.objects.get(user=request.user,project=project)
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
@@ -257,6 +275,8 @@ def edit_task_in_list(request, storyID, taskID):
         'tasks': tasks,
         'task': task,
         'editform': form,
+        'project': project,
+        'association': association
     }
 
     return render(request, 'TaskList.html', context)
@@ -286,6 +306,8 @@ def edit_task_in_list(request, storyID, taskID):
 def remove_task_from_list(request, storyID, taskID):
     story = mdl_story.get_story(storyID)
     task = mdl_task.get_task(taskID)
+    project = story.project
+    association = UserAssociation.objects.get(user=request.user,project=project)
     if request.method == 'POST':
         task.delete()
     tasks = mdl_task.get_tasks_for_story(story)
@@ -294,7 +316,9 @@ def remove_task_from_list(request, storyID, taskID):
     context = {
         'story': story,
         'tasks': tasks,
-        'newform': form
+        'newform': form,
+        'project': project,
+        'association': association
     }
 
     return render(request, 'TaskList.html', context)

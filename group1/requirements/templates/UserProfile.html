@@ -1,9 +1,5 @@
 
-	{% if confirm_message %}
-    <div class="modal-dialog modal-md">
-    {% else %}
     <div class="modal-dialog">
-    {% endif %}
       	<div class="modal-content">
 	        <div class="modal-header">
 	        	<a class="btn close" aria-label="Close" href="javascript:void(0);" onclick="closeDialog();">
@@ -11,62 +7,70 @@
 	        	</a>
 	        	<h4 class="modal-title" id="dialogModalLabel">{{ title }}</h4>
 	        </div>
-	        <form id="projectForm" class="form-horizontal" action="{{ action }}" method="post">
+	        <form id="userProfileForm" class="form-horizontal" action="{{ action }}" method="post">
 	        	{% csrf_token %}
 	        	<div class="modal-body">
-	        		{% if confirm_message %}
-	        		<div class="form-group">
-	        			<div class="col-xs-12 col-sm-3"><h2><span class="label label-danger">Warning</span></h2></div>
-	        			<div class="col-xs-12 col-sm-9"><h3>{{ confirm_message }}</h3></div>
-	        		</div>
-	        		<div class="form-group">
-	        			<div class="col-xs-12 col-sm-3"><h4>{{ form.title.label_tag }}</h4></div>
-	        			<div class="col-xs-12 col-sm-9"><h4>{{ form.title.value }}</h4></div>
-	        		</div>
-	        		<div class="form-group">
-	        			<div class="col-xs-12 col-sm-3"><h4>{{ form.description.label_tag }}</h4></div>
-	        			<div class="col-xs-12 col-sm-9"><h4>{{ form.description.value|linebreaksbr }}</h4></div>
-	        		</div>
-	        		{% else %}
-                    {% if form.title.errors %}
+                    {% if form.first_name.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
                     <div class="form-group">
                     {% endif %}
-                        <label for="{{ form.title.id_for_label }}" class="col-xs-12 col-sm-3 control-label">Title</label>
-                        <div class="col-xs-12 col-sm-9" id="{{ form.title.id_for_label }}_popover">
-                            {{ form.title }}
-                            {% if form.title.errors %}
+                        <label for="{{ form.first_name.id_for_label }}" class="col-xs-12 col-sm-4 control-label">First Name</label>
+                        <div class="col-xs-12 col-sm-8" id="{{ form.first_name.id_for_label }}_popover">
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
                             <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                             <span id="inputError2Status" class="sr-only">(error)</span>
                             {% endif %}
                         </div>
 	        		</div>
-                    {% if form.desciption.errors %}
+                    {% if form.last_name.errors %}
                     <div class="form-group has-error has-feedback">
                     {% else %}
                     <div class="form-group">
                     {% endif %}
-                        <label for="{{ form.description.id_for_label }}" class="col-xs-12 col-sm-3 control-label">Description</label>
-                        <div class="col-xs-12 col-sm-9" id="{{ form.description.id_for_label }}_popover">
-                            {{ form.description }}
-                            {% if form.description.errors %}
+                        <label for="{{ form.last_name.id_for_label }}" class="col-xs-12 col-sm-4 control-label">Last Name</label>
+                        <div class="col-xs-12 col-sm-8" id="{{ form.last_name.id_for_label }}_popover">
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
                             <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
                             <span id="inputError2Status" class="sr-only">(error)</span>
                             {% endif %}
                         </div>
-	        		</div>
-	        		{% endif %}
+                    </div>
+                    {% if form.email.errors %}
+                    <div class="form-group has-error has-feedback">
+                    {% else %}
+                    <div class="form-group">
+                    {% endif %}
+                        <label for="{{ form.email.id_for_label }}" class="col-xs-12 col-sm-4 control-label">E-Mail</label>
+                        <div class="col-xs-12 col-sm-8" id="{{ form.email.id_for_label }}_popover">
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+                            <span id="inputError2Status" class="sr-only">(error)</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if form.username.errors %}
+                    <div class="form-group has-error has-feedback">
+                    {% else %}
+                    <div class="form-group">
+                    {% endif %}
+                        <label for="{{ form.username.id_for_label }}" class="col-xs-12 col-sm-4 control-label">Username</label>
+                        <div class="col-xs-12 col-sm-8" id="{{ form.username.id_for_label }}_popover">
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                            <span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+                            <span id="inputError2Status" class="sr-only">(error)</span>
+                            {% endif %}
+                        </div>
+                    </div>
 	        	</div>
         		<div class="modal-footer">
         		  	<a class="btn btn-default" href="javascript:void(0);" onclick="closeDialog();">Close</a>
-        		  	{% if confirm_message %}
-        		  	<a class="btn btn-danger" href="javascript:void(0);" onclick="saveProjectChanges();">{{ button_desc }}</a>
-                    <!-- <button type="submit" class="btn btn-danger">{{ button_desc }}</button> -->
-					{% else %}
-        		  	<a class="btn btn-primary" href="javascript:void(0);" onclick="saveProjectChanges();">{{ button_desc }}</a>
+        		  	<a class="btn btn-primary" href="javascript:void(0);" onclick="saveProfileChanges();">{{ button_desc }}</a>
         		  	<!-- <button type="submit" class="btn btn-primary">{{ button_desc }}</button> -->
-                    {% endif %}
         		</div>
 	        </form>
 
@@ -93,12 +97,12 @@
 
         // detect submit button event to use ajax method to post the form
         // and retrive the return data back if there is error object in form object.
-        function saveProjectChanges() {
+        function saveProfileChanges() {
             $.ajax({
                 type: "POST",
                 cache: false,
-                url: $("#projectForm").attr('action'),
-                data: $("#projectForm").serialize(),
+                url: $("#userProfileForm").attr('action'),
+                data: $("#userProfileForm").serialize(),
                 success: function(data) {
                     if (data != "") {
                         $("#dialogModal").html(data);    

@@ -53,7 +53,7 @@ pre {
 
             <div id="resolution" style="float: left; width: 50%">
 
-                <p style="font-size: 18px; padding: 0px ; margin: 0px;"><b>Project: {{ issue.project }}</b></p>
+                <p style="font-size: 18px; padding: 0px ; margin: 0px;"><b>Project: <a href="/req/projectdetail/{{ issue.project.id }}" style="color: #B22222;">{{ issue.project }}</a></b></p>
 
                 <br>
 
@@ -84,11 +84,6 @@ pre {
             <Strong>History:</Strong><br><br>
             <ul>
                 <li>Created By: <a href="mailto:{{ issue.reporter.email }}" style="color: #B22222;">{{ issue.reporter.first_name }} {{ issue.reporter.last_name }} ({{ issue.reporter }})</a></li><br><br>
-                {% if issue.assignee %}
-                  <li>Assigned To: <a href="mailto:{{ issue.assignee.email }}" style="color: #B22222;">{{ issue.assignee.first_name }} {{ issue.assignee.last_name }} ({{ issue.assignee }})</a></li><br><br>
-                {% else %}
-                  <li>Assigned To: {{ issue.assignee }})</li><br><br>
-                {% endif %}
                 <li>Date Created: {{ issue.submitted_date}} </li><br><br>
                 <li>Last Updated: {{ issue.modified_date }} </li><br><br>
             </ul>
@@ -121,7 +116,7 @@ pre {
                     <p class="text-warning" style="color: #A70303;"><b>Status Updates/Comments: </b></p>
                     {% for comment in comment_list %}
                         
-                            <a href="#{{ forloop.counter0 }}" style="color: #B22222;">#{{ forloop.counter0 }}</a>, 
+                            <a href="#{{ forloop.revcounter }}" style="color: #B22222;">#{{ forloop.revcounter }}</a>, 
                             <a href="mailto:{{ comment.poster.email }}" style="color: #B22222;">{{ comment.poster.first_name }} {{ comment.poster.last_name }} ({{ comment.poster }})</a>, <i>{{comment.date}}</i><br/>
                         {% if comment.is_comment%}
                             <pre style=>{{ comment.comment }}</pre>

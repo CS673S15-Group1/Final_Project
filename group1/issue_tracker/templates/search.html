@@ -69,8 +69,10 @@
            {% endif %} -->
 
   <!-- Left frame_Start -->
-  <div style="padding: 10px; border: solid black; width: 50%; height: 430px; float: left; font-size: 18px; ">
-    <div id="resolution" style="width: 100%">
+  <!-- <div style="padding: 10px; border: solid black; width: 50%; height: 430px; float: left; font-size: 18px; "> -->
+  <div class="container" style="width: 100%">
+  <div class="row"> 
+    <div class="col-md-4 col-xs-12">
          <form action="" method="POST">{% csrf_token %}
          <!-- {{ form.non_field_errors }} -->
          <!-- {{ form.non_field_errors }} -->
@@ -112,21 +114,18 @@
                     {{ form.issue_type }} 
                     </div>
 
-         <p><b>
-         <div class="row">
-           <div class="col-md-12">
-               <input type="submit" value="Submit" class="btn btn-primary" style="float: right; background-color: #A70303;" />
-           </div>
-         </div>
-         </b></p>
+         
     </div>
-  </div><!-- Left frame_End -->
+  <!-- </div>Left frame_End -->
 
          
 
   <!-- Right frame -->
-  <div style="padding: 10px; border: solid black; width: 43%; height: 400px; float: right; font-size: 12px; ">
-    <div id="resolution" style="width: 50%"> 
+  <!-- <div style="padding: 10px; border: solid black; width: 43%; height: 400px; float: right; font-size: 12px; "> -->
+  <div class="col-md-8 col-xs-12">
+  <!-- <div class="container" style="width: 100%">   -->
+    <!-- <div class="row"> -->
+    <div class="col-md-6 col-xs-12"> 
             
                <p class="text-warning" style="color: black;"><b>Submitted date:</b></p>
                       <div class="fieldWrapper">
@@ -155,9 +154,9 @@
                       <label for="{{ form.project.id_for_label }}"></label>
                       {{ form.project }}
                       </div> 
-    </div>   
+    </div>  
 
-    <div id="resolution" style="width:50%"> 
+    <div class="col-md-6 col-xs-12"> 
 
               <p class="text-warning" style="color: black;"><b>Reporter:</b></p>
                       <div class="fieldWrapper">
@@ -188,6 +187,13 @@
                       </div> 
            
 
+           <p><b>
+         <div class="row">
+           <div class="col-sm-12">
+               <input type="submit" value="Submit" class="btn btn-primary" style="float: left; background-color: #A70303;" />
+           </div>
+         </div>
+         </b></p>
            <!-- <table> {{ form }} </table>  -->
   </form>
 
@@ -199,10 +205,13 @@
         $("#{{ form.closed_date.id_for_label }}").datepicker({dateFormat : "mm/dd/yy"});
         });</script>
       <!-- DatePicker_End -->
+    <!-- </div>  -->
 
-    </div> 
    </div><!-- Right frame_End -->
+  <!-- </div>  -->
   </div>
+  </div>
+</div>
   <!-- search page display_END -->    
 {% endif %}
 

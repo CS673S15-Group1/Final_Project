@@ -57,7 +57,7 @@ class RoleTestCase(TestCase):
         
     def testEditStoryAsClient(self):
         self.__addUserAsClient()
-        self.assertEquals(user_manager.canEditStoryInProject(userID=self.__user.id, projectID=self.__project.id), False)
+        self.assertEquals(user_manager.canEditStoryInProject(userID=self.__user.id, projectID=self.__project.id), True)
         
     def testEditStoryAsDev(self):
         self.__addUserAsDev()

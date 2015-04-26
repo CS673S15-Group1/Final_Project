@@ -1,5 +1,9 @@
+{% load require_tags %}
 <div class="panel-body">
 	<div class="list_group">
+
+        {% check_permission association project "AddTasks" as can_add_tasks %}
+        {% if can_add_tasks %}
 		{% if newform %}
 		<div class="list-group-item">
 			<div class="list-group-item-text">
@@ -20,6 +24,7 @@
 				</form>
 			</div>
 		</div>
+		{% endif %}
 		{% endif %}
 
 		{% for atask in tasks %}
@@ -48,6 +53,9 @@
 			{% else %}
 				<div class="list-group-item-text">
 					{{ atask.description|linebreaksbr }}
+
+			        {% check_permission association project "EditTasks" as can_edit_tasks %}
+			        {% if can_edit_tasks %}
 					<a class="btn btn-link pull-right" href="javascript:void(0);" onclick="removeTaskFromList({{ story.id }},{{ atask.id }})">
 						<i class="fa fa-trash fa-fw"></i>
 						Delete
@@ -59,6 +67,7 @@
 						<i class="fa fa-edit fa-fw"></i>
 						Edit 
 					</a>
+					{% endif %}
 				</div>
 			{% endif %}
 		</div>
